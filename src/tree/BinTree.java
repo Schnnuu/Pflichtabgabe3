@@ -9,69 +9,82 @@ public class BinTree implements BinTreeInterface{
         root = r;
     }
 
-    // A Method to get the maxValue of a binary tree
-    static  int maxValue(BinNode k){
-        if(k == null){
-            return Integer.MIN_VALUE;
-        }
-        int leftMax = maxValue(k.left);
-        int rightMax = maxValue(k.right);
 
-        return Math.max(k.data, Math.max(leftMax,rightMax));
-    }
-
-    // A Method to get the minValue of a binary tree
-    static  int minValue(BinNode k){
-        if(k == null){
-            return Integer.MAX_VALUE;
-        }
-        int leftMin = minValue(k.left);
-        int rightMin = minValue(k.right);
-
-        return Math.min(k.data, Math.min(leftMin,rightMin));
-    }
-
-
-    //a recursive method to calculate the MaxSum of a binary tree
+    /**
+     * calculates the maximum sum of the node values on a path from the root to any leaf
+     * @return maximum sum of the node values from the root to any leaf
+     */
     @java.lang.Override
     public int calculateMaxSum() {
         return calculateMaxSum(root);
     }
 
-    public int calculateMaxSum(BinNode k){
-        if (k == null){
+    public int calculateMaxSum(BinNode node){
+        if (node == null){
             return 0;
         }
         //two integers which call themselves to get the maxSum from their side
-        int leftMax = calculateMaxSum(k.left);
-        int rightMax = calculateMaxSum(k.right);
+        int leftMax = calculateMaxSum(node.left);
+        int rightMax = calculateMaxSum(node.right);
 
         //checks whether left or right side is bigger and adds the root value to it
-        return Math.max(leftMax, rightMax) + k.data;
+        return Math.max(leftMax, rightMax) + node.data;
     }
 
-    // A recursive methode to check if a binary tree is sorted or not
+
+    /**
+     * Two Methods to locate the maximum and minimum value in a given Bin Tree
+     * Both methods are helper methods for isSorted() Method
+     */
+    // A Method to get the maxValue of a binary tree
+    private static int maxValue(BinNode node){
+        if(node == null){
+            return Integer.MIN_VALUE;
+        }
+        int leftMax = maxValue(node.left);
+        int rightMax = maxValue(node.right);
+
+        return Math.max(node.data, Math.max(leftMax,rightMax));
+    }
+
+    // A Method to get the minValue of a binary tree
+    private static int minValue(BinNode node){
+        if(node == null){
+            return Integer.MAX_VALUE;
+        }
+        int leftMin = minValue(node.left);
+        int rightMin = minValue(node.right);
+
+        return Math.min(node.data, Math.min(leftMin,rightMin));
+    }
+
+
+    /**
+     * checks whether the tree is sorted
+     * @return true, if the tree is sorted
+     */
     @java.lang.Override
     public boolean isSorted() {
         return isSorted(root);
     }
-    public boolean isSorted(BinNode k){
-        if (k == null){
+
+    public boolean isSorted(BinNode node){
+        if (node == null){
             return true;
         }
 
         // checks if the left node is smaller than the root
-        if (k.left != null && maxValue(k.left) > k.data){
+        if (node.left != null && maxValue(node.left) > node.data){
             return false;
         }
 
         //checks if the right node is bigger than the root
-        if (k.right != null && minValue(k.right) < k.data){
+        if (node.right != null && minValue(node.right) < node.data){
             return false;
         }
 
         //checks if both sides are sorted correctly
-        if (!isSorted(k.left) || !isSorted(k.right)){
+        if (!isSorted(node.left) || !isSorted(node.right)){
             return false;
         }
 
@@ -79,72 +92,101 @@ public class BinTree implements BinTreeInterface{
         return true;
     }
 
-    //an iterativ method to print a binary tree to console with a generic stack
-    //and in preorder
+
+    /**
+     * print all nodes of a tree according to the preorder
+     * using a generic stack
+     * not rekursive (but iterative) method
+     */
     @Override
-    public void depthFirst() {
-        if (root == null) {
-            return;
-        }
+    public void depthFirst() throws IllegalStateException{
+        // If the tree is empty, throws Exception
+        if (root == null)throw new IllegalStateException("Binary Tree is null!");
 
+        // Create a stack to facilitate depth-first traversal
         StackGeneric<BinNode> stack = new StackGeneric<>();
-        stack.push(root);
+        stack.push(root); // Start by pushing the root node onto the stack
 
-        //While-Loop that prints the current node until the stack is empty
+        // Traverse the tree using a while loop until the stack is empty
         while (!stack.isEmpty()) {
-            BinNode k = stack.pop();
+            // Pop the top node from the stack
+            BinNode node = stack.pop();
 
-            // Prints current node
-            System.out.print(k.data + " ");
+            // Print the data of the popped node (could be modified for different actions)
+            System.out.print(node.data + " ");
 
-            // First we put the right child on the stack and then the left child
-            // Last in, first out
-            if (k.right != null) {
-                stack.push(k.right);
+            // Push the right child onto the stack (if exists) before the left child
+            // This ensures the left child is processed first in depth-first traversal
+            if (node.right != null) {
+                stack.push(node.right);
             }
-            if (k.left != null) {
-                stack.push(k.left);
+            if (node.left != null) {
+                stack.push(node.left);
             }
         }
     }
 
+    /**
+     * removes a node with the given value from a sorted binary tree
+     * after that the binary tree is still sorted
+     * @param away given value to remove
+     */
     @Override
-    public boolean removeNode(int value) {
+    public boolean removeNode(int away) {
+        // If the tree is empty, return false as there's nothing to remove
         if (root == null) {
             return false;
         }
-        root = removeNode(root, value);
-        return true;
+        // Call the private recursive method to start the removal process
+        root = removeNode(root, away);
+        return true; // Return true indicating the removal was completed
     }
 
-    private BinNode removeNode(BinNode currentNode, int value) {
+    // Private recursive method to remove a node with a given value
+    private BinNode removeNode(BinNode currentNode, int away) {
+        // If the current node is null, return it
         if (currentNode == null) {
             return currentNode;
         }
 
-        if (value < currentNode.data) {
-            currentNode.setLeft(removeNode(currentNode.left, value));
-        } else if (value > currentNode.data) {
-            currentNode.setRight(removeNode(currentNode.right, value));
+        // Check if the value to remove is less than or greater than the current node's value
+        if (away < currentNode.data) {
+            // If smaller, traverse left subtree
+            currentNode.setLeft(removeNode(currentNode.left, away));
+        } else if (away > currentNode.data) {
+            // If larger, traverse right subtree
+            currentNode.setRight(removeNode(currentNode.right, away));
         } else {
+            // If the node to be removed is found
+
+            // If the node has no left child, replace it with its right child
             if (currentNode.left == null) {
                 return currentNode.right;
             } else if (currentNode.right == null) {
+                // If the node has no right child, replace it with its left child
                 return currentNode.left;
             }
 
+            // If the node has both left and right children
+            // Find the minimum value node in the right subtree (successor)
             BinNode successor = findMin(currentNode.right);
+            // Replace the current node's value with the successor's value
             currentNode.setData(successor.data);
+            // Remove the successor node from the right subtree
             currentNode.setRight(removeNode(currentNode.right, successor.data));
         }
+        // Return the current node after potential modifications
         return currentNode;
     }
 
+
+    // Private method to find the node with the minimum value in a subtree
     private BinNode findMin(BinNode node) {
-        while (node.left != null) {
-            node = node.left;
+        // Traverse to the rightmost node in the subtree
+        while (node.right != null) {
+            node = node.right; // Move to the right child
         }
-        return node;
+        return node; // Return the node with the minimum value
     }
 
 }
